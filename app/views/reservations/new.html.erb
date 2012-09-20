@@ -14,7 +14,7 @@
 	
 		  {{! resource_categories }}
 
-		  {{ _.each(reservations, function(reservation) { }}
+		  {{ _.each(reservations.list, function(reservation) { }}
 		  <tr id="reservation_{{= reservation.id }}">
 		    <td> {{= reservation.id }} </td>
 		    <td> {{= reservation.start }} </td>
@@ -27,7 +27,7 @@
 	</div>
 	<h1>What would you like to reserve?</h1>
 	<div class="btn-group wizard-btn-group">
-		{{ _.each(resource_categories, function(category) { }}
+		{{ _.each(resource_categories.list, function(category) { }}
 			<input type="submit" name="resource[{{= category.id }}]" class="btn wizard-resource resource-{{= category.name }}" >
 		{{ }) }}
 	</div>
@@ -43,8 +43,28 @@
 </script>
 
 <%= javascript_include_tag "reservations" %>
+<script type="text/json" id="jsReservations">
+ {
+   "list": <%= @reservations.to_json %>
+ }
+</script>
 <script type="text/javascript">
-	reservations.reservations = $.parseJSON('<%= @reservations.to_json.html_safe %>');
-	reservations.resource_categories = $.parseJSON('<%= @resource_categories.to_json.html_safe %>');
+     var div = $('<div></div>');
+     div.html($('#jsReservations').text());
+     reservations.reservations = JSON.parse(div.text());
+</script>
+
+<script type="text/json" id="jsCategories">
+ {
+   "list": <%= @resource_categories.to_json %>
+ }
+</script>
+<script type="text/javascript">
+     var div = $('<div></div>');
+     div.html($('#jsCategories').text());
+     reservations.resource_categories = JSON.parse(div.text());
+</script>
+
+<script type="text/javascript">
 	reservations.initialize();
 </script>
