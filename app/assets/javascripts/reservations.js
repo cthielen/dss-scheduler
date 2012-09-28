@@ -49,7 +49,7 @@ function getResourceQuestions(resource) {
 	reservations.reservations = null;
 
 	reservations.initialize = function() {
-		reservations.current_step = 1;
+		reservations.current_step = 2;
 		console.log('I just initialized!');
 		
 		$('#wizard').modal({
@@ -86,10 +86,23 @@ function getResourceQuestions(resource) {
 	};
 	
 	reservations.perform_step = function() {
-		var tmpl = $("#templ-step" + reservations.current_step).html();
+		var tmpl = $("#tmpl-step" + reservations.current_step).html();
 		$('.modal').empty();
 		console.log(reservations);
-		var compiled = _.template(tmpl, {reservations: reservations.reservations, resource_categories: reservations.resource_categories});
+		switch(reservations.current_step)
+		{
+		case 2:
+			var compiled = _.template(tmpl, {resources: reservations.resources, departments: reservations.departments});
+		  break;
+		case 3:
+			var compiled = _.template(tmpl, {});
+		  break;
+		case 4:
+			var compiled = _.template(tmpl, {});
+		  break;
+		default:
+			var compiled = _.template(tmpl, {reservations: reservations.reservations, resource_categories: reservations.resource_categories});
+		}
 		$('.modal').html(compiled);
 	}
 
