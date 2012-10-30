@@ -28,7 +28,7 @@
 	<h1>What would you like to reserve?</h1>
 	<div class="btn-group wizard-btn-group">
 		{{ _.each(resource_categories.list, function(category) { }}
-			<input type="submit" name="resource[{{= category.id }}]" class="btn wizard-resource resource-{{= category.name }}" >
+			<input type="submit" class="btn wizard-resource resource-{{= category.name }}" data-category="{{= category.id }}" >
 		{{ }) }}
 	</div>
 </script>
@@ -62,13 +62,33 @@
 				</select>
 			</div>
 		</div>
+		<div id="nav-area">
+			<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+			<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+		</div>
 	</fieldset>
 </script>
 <script id="tmpl-step3" type="text/template">
-  	<p>{{= question.question }}</p><input type="text" />
+	<p>
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+	</p>
+	{{ _.each(questions.list, function(question) { }}
+		<p>{{= question.question }}</p><input type="text" id="question[{{= question.id }}]" />
+	{{ }) }}  	
+	<div id="nav-area">
+		<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+		<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+	</div>
 </script>
 <script id="tmpl-step4" type="text/template">
-  	<p>{{= question.question }}</p><input type="text" />
+  	<div id='calendar'></div>
+	<div id="nav-area">
+		<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+		<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+	</div>
 </script>
 
 
@@ -118,6 +138,18 @@
      var div = $('<div></div>');
      div.html($('#jsResources').text());
      reservations.resources = JSON.parse(div.text());
+</script>
+
+<!-- Step 3 -->
+<script type="text/json" id="jsQuestions">
+ {
+   "list": <%= @questions.to_json %>
+ }
+</script>
+<script type="text/javascript">
+     var div = $('<div></div>');
+     div.html($('#jsQuestions').text());
+     reservations.questions = JSON.parse(div.text());
 </script>
 
 <script type="text/javascript">
