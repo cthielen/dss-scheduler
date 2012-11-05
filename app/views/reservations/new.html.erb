@@ -40,10 +40,11 @@
 		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
 	</p>
 	<fieldset class="dept-resource">
+		<form class="new_reservation">
 		<div class="control-group">
 			<label class="control-label" for="input01">Department</label>
 			<div class="controls">
-				<select id="department_id" name="resource[ou_uid]">
+				<select id="resource_ou_uid" name="resource_ou_uid">
 					<option value class="static">Select Department</option>
 					{{ _.each(departments.list, function(department) { }}
 						<option value="{{= department.ou_uid }}">{{= department.description }}</option>
@@ -54,7 +55,7 @@
 		<div class="control-group">
 			<label class="control-label" for="input01">Resource</label>
 			<div class="controls">
-				<select id="resource_id" name="reservation[resource_id]">
+				<select id="resource_id" name="resource_id">
 					<option value class="static">Select Resource</option>
 					{{ _.each(resources.list, function(resource) { }}
 						<option value="{{= resource.id }}" class="dep_{{= resource.ou_uid }}">{{= resource.name }}</option>
@@ -62,6 +63,7 @@
 				</select>
 			</div>
 		</div>
+		</form>
 		<div id="nav-area">
 			<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
 			<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
@@ -92,6 +94,8 @@
 </script>
 
 
+<%= javascript_include_tag "fullcalendar/fullcalendar" %>
+<%= javascript_include_tag "fullcalendar/jquery.rest" %>
 <%= javascript_include_tag "reservations" %>
 <!-- Variable Assignments -->
 <!-- Step 1 -->

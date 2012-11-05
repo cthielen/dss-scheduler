@@ -1,26 +1,3 @@
-
-
-
-
-function getResourceQuestions(resource) {
-	$.ajax({
-		url: '/resources/' + resource + '/questions.json',
-		success: function(questions) {
-			
-			//$('div#debug-area').html(result);
-			var tmpl = $('#tmpl-question').html();
-			//console.log(tmpl);
-			$('div#wizard-form').html('');
-			_.each(questions, function(question) {
-				var compiled = _.template(tmpl, {question: question});
-				$('div#wizard-form').append(compiled);
-			});
-		}
-	})
-}
-
-
-
 (function (reservations, $, undefined) {
 	reservations.current_step = null;
 	reservations.reservations = null;
@@ -34,7 +11,6 @@ function getResourceQuestions(resource) {
 		});
 		
 		reservations.perform_step();
-		
 	};
 	
 	reservations.perform_step = function() {
@@ -89,14 +65,13 @@ function getResourceQuestions(resource) {
 			$('#calendar').fullCalendar('render');
 		  break;
 		default:
-			$('a[data-method="delete"]').on('ajax:success', function(e, c, s, o) {
+			$('a[data-method="delete"]').on('ajax:success', function(e) {
 				$(this).parent().parent().fadeOut();
-				console.log(e);
 			});
 			$('input.wizard-resource').click(function(e) {
 			  reservations.current_step = 2;
 			  reservations.perform_step();
-			  console.log(e.target.dataset.category);
+			  console.log(e.target.dataset.category); //TODO: Assign a variable to hold the category id here
 			});
 		}
 		//Common initializations
