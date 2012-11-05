@@ -13,7 +13,6 @@
 //= require      jquery
 //= require      jquery_ujs
 //= require      bootstrap
-//= require_tree ./fullcalendar
 //= require      jquery-ui-1.8.11.custom.min
 //= require      resources
 //= require		 underscore
