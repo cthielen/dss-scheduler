@@ -1,47 +1,84 @@
+// DSS-Calendar (initializing fullcalendar with events)
+function initDSSCalendar () {
+	var date = new Date();
+	var d = date.getDate();
+	var m = date.getMonth();
+	var y = date.getFullYear();
+
+	$('#calendar').fullCalendar({
+		editable: true,
+		header: {
+			left: 'prev,next today',
+			center: 'title',
+			right: 'month,agendaWeek,agendaDay'
+		},
+		defaultView: 'agendaWeek',
+		height: 300,
+		slotMinutes: 30,
+		selectable: true,
+		selectHelper: true,
+		editable: true,
+		minTime: 7,
+		maxTime: 19,
+
+		select: function(start, end, allDay) {
+			var title = prompt('Exchange Event ID:');
+			if (title) {
+				$('#calendar').fullCalendar('renderEvent', {
+						title: title,
+						start: start,
+						end: end,
+						allDay: allDay
+					},
+					true // make the event "stick"
+				);
+				createEvent({
+					title: title,
+					start: start,
+					end: end,
+					allDay: allDay
+				});
+			}
+			$('#calendar').fullCalendar('unselect');
+		},
 
 
+		loading: function(bool){
+			if (bool)
+				$('#loading').show();
+			else
+				$('#loading').hide();
+		},
 
-// Source: http://jsatt.blogspot.com/2010/01/cascading-select-boxes-using-jquery.html
-function cascadeSelect(parent, child){
-		var childOptions = child.find('option:not(.static)');
-			child.data('options',childOptions);
+		// a future calendar might have many sources.
+		eventSources: [{
+			url: '/reservations',
+			color: '#2F4D6A',
+			textColor: 'white',
+			error: function() {
+				alert('there was an error while fetching events!');
+			}
+		}],
 
-		parent.change(function(){
-			childOptions.remove();
-			child
-				.append(child.data('options').filter('.dep_' + this.value))
-				.change();
-		})
+		timeFormat: 'h:mm t{ - h:mm t} ',
+		dragOpacity: "0.5",
 
-		childOptions.not('.static, .dep_' + parent.val()).remove();
+		//http://arshaw.com/fullcalendar/docs/event_ui/eventDrop/
+		eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc){
+			updateEvent(event);
+		},
 
+		// http://arshaw.com/fullcalendar/docs/event_ui/eventResize/
+		eventResize: function(event, dayDelta, minuteDelta, revertFunc){
+			updateEvent(event);
+		},
+
+		// http://arshaw.com/fullcalendar/docs/mouse/eventClick/
+		eventClick: function(event, jsEvent, view){
+			// would like a lightbox here.
+		},
+	});
 }
-
-$(function(){
-	//cascadeForm = $('.new_reservation');
-	//departmentSelect = cascadeForm.find('#resource_ou_uid');
-	//resourceSelect = cascadeForm.find('#resource_id');
-
-	//cascadeSelect(departmentSelect, resourceSelect);
-});
-
-function getResourceQuestions(resource) {
-	$.ajax({
-		url: '/resources/' + resource + '/questions.json',
-		success: function(questions) {
-			
-			//$('div#debug-area').html(result);
-			var tmpl = $('#tmpl-question').html();
-			//console.log(tmpl);
-			$('div#wizard-form').html('');
-			_.each(questions, function(question) {
-				var compiled = _.template(tmpl, {question: question});
-				$('div#wizard-form').append(compiled);
-			});
-		}
-	})
-}
-
 
 
 (function (reservations, $, undefined) {
@@ -50,47 +87,88 @@ function getResourceQuestions(resource) {
 
 	reservations.initialize = function() {
 		reservations.current_step = 1;
-		console.log('I just initialized!');
 		
 		$('#wizard').modal({
 			keyboard: false,
 			show: true
 		});
-		$('#wizard').on('shown', function () {
-			$('#calendar').fullCalendar('render');
-		});
-		$('a[data-method="delete"]').on('ajax:success', function(e, c, s, o) {
-			$(this).parent().parent().fadeOut();
-			console.log(e);
-		});
-		$('input#btn_continue').click( function(e){
-			e.preventDefault();
-			reservations.current_step++;
-			reservations.perform_step();
-		});
-		$('input#btn_back').click( function(e){
-			e.preventDefault();
-			reservations.current_step--;
-			reservations.perform_step();
-		});
-		$('fieldset.dept-resource').ready( function(e){
-			cascadeForm = $('.new_reservation');
-			departmentSelect = cascadeForm.find('#resource_ou_uid');
-			resourceSelect = cascadeForm.find('#resource_id');
-
-			cascadeSelect(departmentSelect, resourceSelect);
-		});
 		
 		reservations.perform_step();
-		
 	};
 	
 	reservations.perform_step = function() {
-		var tmpl = $("#templ-step" + reservations.current_step).html();
+		var tmpl = $("#tmpl-step" + reservations.current_step).html();
 		$('.modal').empty();
-		console.log(reservations);
-		var compiled = _.template(tmpl, {reservations: reservations.reservations, resource_categories: reservations.resource_categories});
+		//Rendering the steps
+		switch(reservations.current_step)
+		{
+		case 2:
+			var compiled = _.template(tmpl, {resources: reservations.resources, departments: reservations.departments});
+		  break;
+		case 3:
+			var compiled = _.template(tmpl, {questions: reservations.questions});
+		  break;
+		case 4:
+			var compiled = _.template(tmpl, {});
+		  break;
+		default:
+			var compiled = _.template(tmpl, {reservations: reservations.reservations, resource_categories: reservations.resource_categories});
+		}
 		$('.modal').html(compiled);
+		//Initializations for each step
+		switch(reservations.current_step)
+		{
+		case 2:
+			// Source: http://jsatt.blogspot.com/2010/01/cascading-select-boxes-using-jquery.html
+			function cascadeSelect(parent, child){
+					var childOptions = child.find('option:not(.static)');
+						child.data('options',childOptions);
+
+					parent.change(function(){
+						childOptions.remove();
+						child
+							.append(child.data('options').filter('.dep_' + this.value))
+							.change();
+					})
+
+					childOptions.not('.static, .dep_' + parent.val()).remove();
+			}
+			
+			$('fieldset.dept-resource').ready( function(e){
+				cascadeForm = $('.new_reservation');
+				departmentSelect = cascadeForm.find('#resource_ou_uid');
+				resourceSelect = cascadeForm.find('#resource_id');
+
+				cascadeSelect(departmentSelect, resourceSelect);
+			});
+		  break;
+		case 3:
+		  break;
+		case 4:
+			initDSSCalendar();
+			$('#calendar').fullCalendar('render');
+		  break;
+		default:
+			$('a[data-method="delete"]').on('ajax:success', function(e) {
+				$(this).parent().parent().fadeOut();
+			});
+			$('input.wizard-resource').click(function(e) {
+			  reservations.current_step = 2;
+			  reservations.perform_step();
+			  console.log(e.target.dataset.category); //TODO: Assign a variable to hold the category id here
+			});
+		}
+		//Common initializations
+		$('input#back').click(function(e){
+			reservations.current_step = parseInt(e.target.dataset.step) - 1;
+			reservations.perform_step();
+		});
+		$('input#next').click(function(e){
+			reservations.current_step = parseInt(e.target.dataset.step) + 1;
+			console.log("current step: " + reservations.current_step);
+			reservations.perform_step();
+		});
+		
 	}
 
 } (window.reservations = window.reservations || {}, jQuery));

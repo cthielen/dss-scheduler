@@ -104,8 +104,9 @@ class ReservationsController < ApplicationController
     @departments = Resource.select("DISTINCT(ou_uid), description") 
     @resource = @reservation.resource
     @resource_category = @resource.resource_category if @resource
-    @resources = @resource_category.resources if @resource_category
-    @questions = @resource.questions if @resource
+    #@resources = @resource_category.resources if @resource_category
+    @resources = Resource.all
+    @questions = Question.all#@resource.questions if @resource
     @questions.each do |q|
         response = q.question_responses.build
     end if (@questions && !response)

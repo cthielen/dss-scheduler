@@ -2,7 +2,7 @@
 	<button type="button" class="close" data-dismiss="modal">×</button>
 </div>
 
-<script id="templ-step1" type="text/template">
+<script id="tmpl-step1" type="text/template">
   	<h1>Agenda</h1>
 	<div id="wizard-table">
 		<table class="table table-striped table-condensed wizard">
@@ -28,21 +28,77 @@
 	<h1>What would you like to reserve?</h1>
 	<div class="btn-group wizard-btn-group">
 		{{ _.each(resource_categories.list, function(category) { }}
-			<input type="submit" name="resource[{{= category.id }}]" class="btn wizard-resource resource-{{= category.name }}" >
+			<input type="submit" class="btn wizard-resource resource-{{= category.name }}" data-category="{{= category.id }}" >
 		{{ }) }}
 	</div>
 </script>
 <script id="tmpl-step2" type="text/template">
-  	<p>{{= question.question }}</p><input type="text" />
+	<p>
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+	</p>
+	<fieldset class="dept-resource">
+		<form class="new_reservation">
+		<div class="control-group">
+			<label class="control-label" for="input01">Department</label>
+			<div class="controls">
+				<select id="resource_ou_uid" name="resource_ou_uid">
+					<option value class="static">Select Department</option>
+					{{ _.each(departments.list, function(department) { }}
+						<option value="{{= department.ou_uid }}">{{= department.description }}</option>
+					{{ }) }}
+				</select>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="input01">Resource</label>
+			<div class="controls">
+				<select id="resource_id" name="resource_id">
+					<option value class="static">Select Resource</option>
+					{{ _.each(resources.list, function(resource) { }}
+						<option value="{{= resource.id }}" class="dep_{{= resource.ou_uid }}">{{= resource.name }}</option>
+					{{ }) }}
+				</select>
+			</div>
+		</div>
+		</form>
+		<div id="nav-area">
+			<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+			<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+		</div>
+	</fieldset>
 </script>
 <script id="tmpl-step3" type="text/template">
-  	<p>{{= question.question }}</p><input type="text" />
+	<p>
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+		Instructions go here. Instructions go here. Instructions go here. Instructions go here.
+	</p>
+	{{ _.each(questions.list, function(question) { }}
+		<p>{{= question.question }}</p><input type="text" id="question[{{= question.id }}]" />
+	{{ }) }}  	
+	<div id="nav-area">
+		<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+		<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+	</div>
 </script>
 <script id="tmpl-step4" type="text/template">
-  	<p>{{= question.question }}</p><input type="text" />
+  	<div id='calendar'></div>
+	<div id="nav-area">
+		<input type="submit" value="Back" class="btn" id="back" data-step="{{= reservations.current_step }}" >
+		<input type="submit" value="Next" class="btn" id="next" data-step="{{= reservations.current_step }}" >
+	</div>
 </script>
 
+
+<%= javascript_include_tag "fullcalendar/fullcalendar" %>
+<%= javascript_include_tag "fullcalendar/jquery.rest" %>
 <%= javascript_include_tag "reservations" %>
+<!-- Variable Assignments -->
+<!-- Step 1 -->
 <script type="text/json" id="jsReservations">
  {
    "list": <%= @reservations.to_json %>
@@ -63,6 +119,41 @@
      var div = $('<div></div>');
      div.html($('#jsCategories').text());
      reservations.resource_categories = JSON.parse(div.text());
+</script>
+
+<!-- Step 2 -->
+<script type="text/json" id="jsDepartments">
+ {
+   "list": <%= @departments.to_json %>
+ }
+</script>
+<script type="text/javascript">
+     var div = $('<div></div>');
+     div.html($('#jsDepartments').text());
+     reservations.departments = JSON.parse(div.text());
+</script>
+
+<script type="text/json" id="jsResources">
+ {
+   "list": <%= @resources.to_json %>
+ }
+</script>
+<script type="text/javascript">
+     var div = $('<div></div>');
+     div.html($('#jsResources').text());
+     reservations.resources = JSON.parse(div.text());
+</script>
+
+<!-- Step 3 -->
+<script type="text/json" id="jsQuestions">
+ {
+   "list": <%= @questions.to_json %>
+ }
+</script>
+<script type="text/javascript">
+     var div = $('<div></div>');
+     div.html($('#jsQuestions').text());
+     reservations.questions = JSON.parse(div.text());
 </script>
 
 <script type="text/javascript">
